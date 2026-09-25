@@ -3,7 +3,7 @@ import { Page } from '../types';
 import {
   LayoutDashboard, Users, Briefcase, CheckSquare, Calendar,
   MessageSquare, UserCircle, FolderOpen, Activity, BarChart3,
-  Menu, X, Bell
+  Menu, X, Bell, LogOut
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ interface SidebarProps {
   onToggle: () => void;
   unreadNotifications: number;
   onNotificationClick: () => void;
+  onLogout: () => void;
 }
 
 const menuItems: { page: Page; label: string; icon: React.ReactNode; badge?: number }[] = [
@@ -27,7 +28,7 @@ const menuItems: { page: Page; label: string; icon: React.ReactNode; badge?: num
   { page: 'analytics', label: 'Аналитика', icon: <BarChart3 size={20} /> },
 ];
 
-export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, unreadNotifications, onNotificationClick }: SidebarProps) {
+export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, unreadNotifications, onNotificationClick, onLogout }: SidebarProps) {
   return (
     <>
       {isOpen && (
@@ -105,6 +106,13 @@ export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, u
               )}
             </button>
           </div>
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 mt-1 rounded-lg text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-all text-sm"
+          >
+            <LogOut size={18} />
+            <span className="font-medium">Выйти</span>
+          </button>
         </div>
       </aside>
     </>
