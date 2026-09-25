@@ -90,9 +90,9 @@ export default function App() {
         return <ChatPage channels={chatChannels} messages={chatMessages}
           onSaveChannels={saveChatChannels} onSaveMessages={saveChatMessages} />;
       case 'employees':
-        return <EmployeesPage employees={employees} />;
+        return <EmployeesPage employees={employees} onSave={(e) => { setEmployees(e); store.saveEmployees(e); }} />;
       case 'disk':
-        return <DocumentsPage documents={documents} onSave={saveDocuments} />;
+        return <DocumentsPage documents={documents} employees={employees} onSave={saveDocuments} />;
       case 'activity':
         return <ActivityPage activity={activity} />;
       default:
