@@ -1,8 +1,8 @@
 import React from 'react';
 import { Page } from '../types';
 import {
-  LayoutDashboard, Users, Briefcase, CheckSquare, Calendar,
-  MessageSquare, UserCircle, FolderOpen, Activity, BarChart3,
+  LayoutDashboard, FileText, CheckSquare, Calendar,
+  MessageSquare, UserCircle, FolderOpen, Activity,
   Menu, X, Bell, LogOut
 } from 'lucide-react';
 
@@ -16,16 +16,15 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
-const menuItems: { page: Page; label: string; icon: React.ReactNode; badge?: number }[] = [
+const menuItems: { page: Page; label: string; icon: React.ReactNode }[] = [
   { page: 'dashboard', label: 'Дашборд', icon: <LayoutDashboard size={20} /> },
-  { page: 'crm', label: 'CRM', icon: <Users size={20} /> },
+  { page: 'workflow', label: 'Документооборот', icon: <FileText size={20} /> },
   { page: 'tasks', label: 'Задачи', icon: <CheckSquare size={20} /> },
   { page: 'calendar', label: 'Календарь', icon: <Calendar size={20} /> },
   { page: 'chat', label: 'Чат', icon: <MessageSquare size={20} /> },
   { page: 'employees', label: 'Сотрудники', icon: <UserCircle size={20} /> },
-  { page: 'documents', label: 'Диск', icon: <FolderOpen size={20} /> },
+  { page: 'disk', label: 'Диск', icon: <FolderOpen size={20} /> },
   { page: 'activity', label: 'Лента', icon: <Activity size={20} /> },
-  { page: 'analytics', label: 'Аналитика', icon: <BarChart3 size={20} /> },
 ];
 
 export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, unreadNotifications, onNotificationClick, onLogout }: SidebarProps) {
@@ -35,12 +34,11 @@ export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, u
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onToggle} />
       )}
 
-      {/* Top bar for mobile */}
       <div className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 z-30 lg:hidden flex items-center justify-between px-4">
         <button onClick={onToggle} className="p-2 rounded-lg hover:bg-gray-100">
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
-        <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Битрикс24</h1>
+        <h1 className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Документооборот</h1>
         <button onClick={onNotificationClick} className="p-2 rounded-lg hover:bg-gray-100 relative">
           <Bell size={20} className="text-gray-600" />
           {unreadNotifications > 0 && (
@@ -55,15 +53,13 @@ export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, u
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 lg:static lg:z-auto`}>
         
-        {/* Logo */}
         <div className="p-5 border-b border-slate-700/50">
           <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-            Битрикс24
+            Документооборот
           </h1>
           <p className="text-slate-500 text-xs mt-1">Корпоративный портал</p>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {menuItems.map((item) => (
             <button
@@ -84,7 +80,6 @@ export default function Sidebar({ currentPage, onPageChange, isOpen, onToggle, u
           ))}
         </nav>
 
-        {/* User section */}
         <div className="p-3 border-t border-slate-700/50">
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-sm font-bold shadow-lg">
