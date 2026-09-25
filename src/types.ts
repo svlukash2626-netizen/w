@@ -1,32 +1,3 @@
-// ===== CRM =====
-export interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  status: 'active' | 'inactive' | 'lead';
-  createdAt: string;
-  notes: string;
-  avatar?: string;
-  managerId?: string;
-}
-
-export interface Deal {
-  id: string;
-  title: string;
-  clientId: string;
-  clientName: string;
-  amount: number;
-  stage: DealStage;
-  createdAt: string;
-  expectedCloseDate: string;
-  description: string;
-  probability: number;
-}
-
-export type DealStage = 'new' | 'in_progress' | 'negotiation' | 'proposal' | 'closed_won' | 'closed_lost';
-
 // ===== Tasks =====
 export interface Task {
   id: string;
@@ -99,7 +70,7 @@ export interface Employee {
   skills: string[];
 }
 
-// ===== Documents =====
+// ===== Documents (Disk) =====
 export interface Document {
   id: string;
   name: string;
@@ -113,10 +84,79 @@ export interface Document {
   starred: boolean;
 }
 
+// ===== Document Workflow (Документооборот) =====
+export interface WorkflowDocument {
+  id: string;
+  title: string;
+  type: WorkflowDocType;
+  status: WorkflowStatus;
+  description: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: string;
+  updatedAt: string;
+  dueDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  template?: string;
+  content?: string;
+  approvers: Approver[];
+  currentApproverIndex: number;
+  comments: WorkflowComment[];
+  attachments: string[]; // document IDs
+  tags: string[];
+  version: number;
+}
+
+export type WorkflowDocType = 
+  | 'contract' 
+  | 'invoice' 
+  | 'order' 
+  | 'report' 
+  | 'memo' 
+  | 'request' 
+  | 'act' 
+  | 'other';
+
+export type WorkflowStatus = 
+  | 'draft' 
+  | 'pending_approval' 
+  | 'approved' 
+  | 'rejected' 
+  | 'signed' 
+  | 'archived';
+
+export interface Approver {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  status: 'pending' | 'approved' | 'rejected';
+  comment?: string;
+  approvedAt?: string;
+  order: number;
+}
+
+export interface WorkflowComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface DocumentTemplate {
+  id: string;
+  name: string;
+  type: WorkflowDocType;
+  description: string;
+  content: string;
+  createdBy: string;
+  createdAt: string;
+}
+
 // ===== Activity =====
 export interface ActivityItem {
   id: string;
-  type: 'deal' | 'task' | 'call' | 'email' | 'comment' | 'login' | 'document';
+  type: 'document' | 'task' | 'call' | 'email' | 'comment' | 'login' | 'approval' | 'file';
   description: string;
   userId: string;
   userName: string;
@@ -138,11 +178,11 @@ export interface Notification {
 
 export type Page =
   | 'dashboard'
-  | 'crm'
+  | 'documents'
+  | 'workflow'
   | 'tasks'
   | 'calendar'
   | 'chat'
   | 'employees'
-  | 'documents'
-  | 'activity'
-  | 'analytics';
+  | 'disk'
+  | 'activity';
