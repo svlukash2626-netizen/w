@@ -12,8 +12,10 @@ import DocumentsPage from './components/DocumentsPage';
 import ActivityPage from './components/ActivityPage';
 import AnalyticsPage from './components/AnalyticsPage';
 import NotificationsPanel from './components/NotificationsPanel';
+import LoginPage from './components/LoginPage';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -30,19 +32,39 @@ export default function App() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Load data
+  // Check authentication on mount
   useEffect(() => {
-    setClients(store.getClients());
-    setDeals(store.getDeals());
-    setTasks(store.getTasks());
-    setCalendar(store.getCalendar());
-    setChatChannels(store.getChatChannels());
-    setChatMessages(store.getChatMessages());
-    setEmployees(store.getEmployees());
-    setDocuments(store.getDocuments());
-    setActivity(store.getActivity());
-    setNotifications(store.getNotifications());
+    const auth = localStorage.getItem('b24_auth');
+    if (auth) {
+      setIsAuthenticated(true);
+    }
   }, []);
+
+  // Load data after authentication
+  useEffect(() => {
+    if (isAuthenticated) {
+      setClients(store.getClients());
+      setDeals(store.getDeals());
+      setTasks(store.getTasks());
+      setCalendar(store.getCalendar());
+      setChatChannels(store.getChatChannels());
+      setChatMessages(store.getChatMessages());
+      setEmployees(store.getEmployees());
+      setDocuments(store.getDocuments());
+      setActivity(store.getActivity());
+      setNotifications(store.getNotifications());
+    }
+  }, [isAuthenticated]);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('b24_auth');
+    setIsAuthenticated(false);
+    setCurrentPage('dashboard');
+  };
 
   // Save handlers
   const saveClients = (v: Client[]) => { setClients(v); store.saveClients(v); };
@@ -96,6 +118,11 @@ export default function App() {
     }
   };
 
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar
@@ -105,6 +132,7 @@ export default function App() {
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         unreadNotifications={unreadNotifications}
         onNotificationClick={() => setShowNotifications(true)}
+        onLogout={handleLogout}
       />
       <main className="flex-1 lg:ml-0 min-w-0">
         <div className="p-4 sm:p-6 lg:p-8 pt-16 lg:pt-8">

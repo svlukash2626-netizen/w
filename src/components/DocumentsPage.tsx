@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Document } from '../types';
-import { Search, Folder, File, Star, Share2, Download, MoreVertical, Plus, Grid, List } from 'lucide-react';
+import { Search, Folder, File, Star, Share2, Download, MoreVertical, Plus, Grid, List, Eye } from 'lucide-react';
+import DocumentViewer from './DocumentViewer';
 
 interface DocumentsProps {
   documents: Document[];
@@ -12,6 +13,7 @@ export default function DocumentsPage({ documents, onSave }: DocumentsProps) {
   const [currentFolder, setCurrentFolder] = useState<string | undefined>(undefined);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [showStarred, setShowStarred] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
 
   const filtered = documents.filter(d => {
     const matchesSearch = d.name.toLowerCase().includes(search.toLowerCase());
@@ -112,11 +114,13 @@ export default function DocumentsPage({ documents, onSave }: DocumentsProps) {
             </div>
           ))}
           {files.map(file => (
-            <div key={file.id} className="bg-white rounded-xl p-4 border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer group">
+            <div key={file.id} onClick={() => setViewingDocument(file)} className="bg-white rounded-xl p-4 border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
                 <File size={36} className={getFileIcon(file.mimeType)} />
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => toggleStar(file.id)}
+                  <button onClick={e => { e.stopPropagation(); setViewingDocument(file); }}
+                    className="p-1 text-gray-300 hover:text-indigo-500 rounded"><Eye size={14} /></button>
+                  <button onClick={e => { e.stopPropagation(); toggleStar(file.id); }}
                     className={`p-1 rounded ${file.starred ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}`}>
                     <Star size={14} fill={file.starred ? 'currentColor' : 'none'} />
                   </button>
@@ -174,6 +178,11 @@ export default function DocumentsPage({ documents, onSave }: DocumentsProps) {
           <Folder size={48} className="mx-auto mb-3 text-gray-300" />
           <p>Папка пуста</p>
         </div>
+      )}
+
+      {/* Document Viewer */}
+      {viewingDocument && (
+        <DocumentViewer document={viewingDocument} onClose={() => setViewingDocument(null)} />
       )}
     </div>
   );
