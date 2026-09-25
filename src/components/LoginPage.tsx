@@ -107,8 +107,8 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800">Вход в систему</h2>
-              <p className="text-gray-500 mt-2">Введите свои учётные данные</p>
+              <h2 className="text-2xl font-bold text-gray-800">Авторизация</h2>
+              <p className="text-gray-500 mt-2">Введите учётные данные для входа</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -163,7 +163,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                   <span className="text-sm text-gray-600">Запомнить меня</span>
                 </label>
                 <button type="button" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                  Забыли пароль?
+                  Восстановить пароль
                 </button>
               </div>
 
@@ -187,19 +187,19 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Вход...
+                    Выполняется вход...
                   </>
                 ) : (
-                  'Войти'
+                  'Войти в систему'
                 )}
               </button>
             </form>
 
             {/* Demo credentials */}
             <div className="mt-6 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-              <p className="text-sm text-indigo-800 font-medium mb-2">Демо-доступ:</p>
+              <p className="text-sm text-indigo-800 font-medium mb-2">Данные для входа:</p>
               <div className="space-y-1 text-sm text-indigo-700">
-                <p><span className="font-medium">Email:</span> admin@company.ru</p>
+                <p><span className="font-medium">Эл. почта:</span> admin@company.ru</p>
                 <p><span className="font-medium">Пароль:</span> admin</p>
               </div>
             </div>

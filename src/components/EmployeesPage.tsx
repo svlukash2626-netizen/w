@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { Employee } from '../types';
-import { Search, Mail, Phone, Building, Briefcase, Calendar } from 'lucide-react';
+import { generateId } from '../store';
+import { Search, Mail, Phone, Building, Calendar, Plus, Edit2, X, UserPlus } from 'lucide-react';
 
 interface EmployeesProps {
   employees: Employee[];
+  onSave: (e: Employee[]) => void;
 }
 
-export default function EmployeesPage({ employees }: EmployeesProps) {
+export default function EmployeesPage({ employees, onSave }: EmployeesProps) {
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('all');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
   const departments = [...new Set(employees.map(e => e.department))];
   const filtered = employees.filter(e => {
@@ -20,13 +24,51 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
   const statusColors: Record<string, string> = {
     online: 'bg-green-500', offline: 'bg-gray-400', busy: 'bg-red-500', away: 'bg-yellow-500'
   };
-  const statusLabels: Record<string, string> = { online: 'Онлайн', offline: 'Оффлайн', busy: 'Занят', away: 'Отошёл' };
+  const statusLabels: Record<string, string> = { online: 'В сети', offline: 'Не в сети', busy: 'Занят', away: 'Отошёл' };
+
+  const openAddModal = () => {
+    setEditingEmployee(null);
+    setShowFormModal(true);
+  };
+
+  const openEditModal = (emp: Employee) => {
+    setEditingEmployee(emp);
+    setShowFormModal(true);
+  };
+
+  const handleSave = (form: any) => {
+    if (!form.name.trim()) return;
+    if (editingEmployee) {
+      onSave(employees.map(e => e.id === editingEmployee.id ? { ...e, ...form } : e));
+    } else {
+      const newEmp: Employee = {
+        id: generateId(),
+        ...form,
+        hireDate: form.hireDate || new Date().toISOString().split('T')[0]
+      };
+      onSave([...employees, newEmp]);
+    }
+    setShowFormModal(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Удалить сотрудника?')) {
+      onSave(employees.filter(e => e.id !== id));
+      setSelectedEmployee(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">Сотрудники</h2>
-        <p className="text-gray-500 mt-1">Компания и структура</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Сотрудники</h2>
+          <p className="text-gray-500 mt-1">Управление персоналом компании</p>
+        </div>
+        <button onClick={openAddModal}
+          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 text-sm font-medium">
+          <UserPlus size={16} />Добавить сотрудника
+        </button>
       </div>
 
       {/* Filters */}
@@ -51,7 +93,7 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
         </div>
         <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
           <p className="text-2xl font-bold text-green-600">{employees.filter(e => e.status === 'online').length}</p>
-          <p className="text-xs text-gray-500 mt-1">Онлайн</p>
+          <p className="text-xs text-gray-500 mt-1">В сети</p>
         </div>
         <div className="bg-white rounded-xl p-4 border border-gray-100 text-center">
           <p className="text-2xl font-bold text-gray-800">{departments.length}</p>
@@ -97,7 +139,7 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
         ))}
       </div>
 
-      {/* Employee Detail Modal */}
+      {/* Detail Modal */}
       {selectedEmployee && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedEmployee(null)}>
           <div className="bg-white rounded-xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
@@ -123,7 +165,7 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 <Mail size={16} className="text-gray-400" />
                 <div>
-                  <p className="text-xs text-gray-500">Email</p>
+                  <p className="text-xs text-gray-500">Эл. почта</p>
                   <p className="text-sm font-medium text-gray-800">{selectedEmployee.email}</p>
                 </div>
               </div>
@@ -137,7 +179,7 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                 <Calendar size={16} className="text-gray-400" />
                 <div>
-                  <p className="text-xs text-gray-500">Дата найма</p>
+                  <p className="text-xs text-gray-500">Дата приёма на работу</p>
                   <p className="text-sm font-medium text-gray-800">{new Date(selectedEmployee.hireDate).toLocaleDateString('ru-RU')}</p>
                 </div>
               </div>
@@ -150,13 +192,135 @@ export default function EmployeesPage({ employees }: EmployeesProps) {
                 </div>
               </div>
             </div>
-            <button onClick={() => setSelectedEmployee(null)}
-              className="w-full mt-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
-              Закрыть
-            </button>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { setSelectedEmployee(null); openEditModal(selectedEmployee); }}
+                className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium flex items-center justify-center gap-2">
+                <Edit2 size={16} />Редактировать
+              </button>
+              <button onClick={() => handleDelete(selectedEmployee.id)}
+                className="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-medium">
+                Удалить
+              </button>
+              <button onClick={() => setSelectedEmployee(null)}
+                className="flex-1 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Add/Edit Modal */}
+      {showFormModal && (
+        <EmployeeFormModal
+          employee={editingEmployee}
+          departments={departments}
+          onSave={handleSave}
+          onClose={() => setShowFormModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function EmployeeFormModal({ employee, departments, onSave, onClose }: any) {
+  const [form, setForm] = useState({
+    name: employee?.name || '',
+    position: employee?.position || '',
+    department: employee?.department || departments[0] || '',
+    email: employee?.email || '',
+    phone: employee?.phone || '',
+    status: employee?.status || 'online' as Employee['status'],
+    managerId: employee?.managerId || '',
+    hireDate: employee?.hireDate || new Date().toISOString().split('T')[0],
+    skills: employee?.skills?.join(', ') || ''
+  });
+
+  const statusOptions = [
+    { value: 'online', label: 'В сети' },
+    { value: 'offline', label: 'Не в сети' },
+    { value: 'busy', label: 'Занят' },
+    { value: 'away', label: 'Отошёл' }
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-gray-800">
+            {employee ? 'Редактировать сотрудника' : 'Добавить сотрудника'}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">ФИО *</label>
+            <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Иванов Иван Иванович" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Должность</label>
+              <input type="text" value={form.position} onChange={e => setForm({ ...form, position: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Специалист" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Отдел</label>
+              <input type="text" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Название отдела" list="departments-list" />
+              <datalist id="departments-list">
+                {departments.map((d: string) => <option key={d} value={d} />)}
+              </datalist>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Эл. почта</label>
+              <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="email@company.ru" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Телефон</label>
+              <input type="text" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="+7 (999) 123-45-67" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Статус</label>
+              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none">
+                {statusOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Дата приёма</label>
+              <input type="date" value={form.hireDate} onChange={e => setForm({ ...form, hireDate: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Навыки (через запятую)</label>
+            <input type="text" value={form.skills} onChange={e => setForm({ ...form, skills: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Документооборот, Делопроизводство" />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button onClick={() => onSave({ ...form, skills: form.skills.split(',').map((s: string) => s.trim()).filter(Boolean) })}
+            className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium">
+            {employee ? 'Сохранить' : 'Добавить'}
+          </button>
+          <button onClick={onClose} className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg hover:bg-gray-200 font-medium">Отмена</button>
+        </div>
+      </div>
     </div>
   );
 }

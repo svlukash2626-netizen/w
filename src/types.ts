@@ -82,6 +82,8 @@ export interface Document {
   parentId?: string;
   shared: boolean;
   starred: boolean;
+  sharedWith?: string[]; // employee IDs
+  editable?: boolean;
 }
 
 // ===== Document Workflow (Документооборот) =====

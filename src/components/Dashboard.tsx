@@ -58,7 +58,7 @@ export default function Dashboard({ tasks, calendar, activity, workflow, onNavig
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Добро пожаловать!</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Главная</h2>
           <p className="text-gray-500 mt-1">Обзор документооборота и задач</p>
         </div>
         <div className="text-sm text-gray-500">
